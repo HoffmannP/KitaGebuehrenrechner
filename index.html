@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Unverbindliche Kitagebührenberechnung für Jena nach der Gebührenerhöhung</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap-theme.min.css">
+    <script src="http://code.jquery.com/jquery-2.1.4.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sprintf/1.0.1/sprintf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/accounting.js/0.4.1/accounting.min.js"></script>
+    <script src="script.js"></script>
+    <link rel="stylesheet" href="style.css">
+    <script>
+      Parameter = {
+        Neu: {
+          maximalEinkommen: 2861,
+          Freibeträge: [1130, 400, 400],
+          Gebührensatz: 13,
+          minAnrechenbar: false,
+          BetreuungsDifferenzFaktor: 1,
+        },
+        Alt: {
+          maximalEinkommen: 2592,
+          Freibeträge: [1130, 300, 300],
+          Gebührensatz: 13,
+          minAnrechenbar: 150,
+          BetreuungsDifferenzFaktor: .5
+        }
+      };
+    </script>
+  </head>
+  <body>
+    <main class="container">
+      <div class="page-header">
+        <h1>KiTa-Gebührenrechner Jena 2015</h1>
+        <h4>
+          Unverbindlicher Gebührenberechner für die KitaGebühren nach der
+          am 20.05.2015 beschlossenen Änderung der Gebührensatzung der
+          Stadt Jena. <strong>Die Ergebnisse sind ohne Gewähr.</strong>
+        </h4>
+      </div>
+      <form id="kitageb" class="form-horizontal">
+        <div class="form-group kinderzahl">
+          <label class="col-sm-3 control-label">
+            Wählen Sie die Zahl der Kinder in einer Kindertageseinrichtung:
+          </label>
+          <div class="col-sm-3">
+            <label class="radio-inline">
+              <input type="radio" name="kinderzahl" value="1">
+              Ein Kind
+            </label>
+          </div>
+          <div class="col-sm-3">
+            <label class="radio-inline">
+              <input type="radio" name="kinderzahl" value="2">
+              Zwei Kinder
+            </label>
+          </div>
+          <div class="col-sm-3">
+            <label class="radio-inline">
+              <input type="radio" name="kinderzahl" value="3">
+              Drei Kinder oder mehr
+            </label>
+          </div>
+        </div>
+
+        <div class="form-group betreuungszeit">
+          <label class="col-sm-3 control-label">
+            <p>Geben Sie die Betruungszeit an:</p>
+          </label>
+          <div class="col-sm-3 einKind">
+            <div class="input-group">
+              <input type="number" name="zeit" class="form-control" placeholder="9">
+              <div class="input-group-addon">h</div>
+            </div>
+          </div>
+          <div class="col-sm-3 zweiKinder">
+            <div class="input-group">
+              <input type="number" name="zeit" class="form-control" placeholder="9">
+              <div class="input-group-addon">h</div>
+            </div>
+          </div>
+          <div class="col-sm-3 dreiKinder">
+            <div class="input-group">
+              <input type="number" name="zeit" class="form-control" placeholder="9">
+              <div class="input-group-addon">h</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group einkommen">
+          <label class="col-sm-3 control-label">
+            <p>Geben Sie ihre monatlichen Durchschnittseinkommen an:</p>
+            <button type="button" id="einkommenHinzufügen" class="btn btn-default">
+              <span class="glyphicon glyphicon-plus"></span> Hinzufügen
+            </button>
+          </label>
+          <div class="col-sm-9 einkommensliste">
+            <div class="row eintrag einkommen-template">
+              <div class="col-sm-6">
+                <select class="einkommensart form-control">
+                  <option selected disabled>Wählen Sie die Einkommensart (Pauschalabzug)</option>
+                  <option value="40">Steuer- und sozialversicherungspflichtig (40%)</option>
+                  <option value="25">Beamtenbezüge (25%)</option>
+                  <option value="30">Lediglich steuer- oder sozialversicherungspflichtig (30%)</option>
+                  <option value="5">Weder steuer- noch sozialversicherungspflichtig (5%)</option>
+                  <option value="0">Sozialleistungen, Elterngeld, Kindergeld, Unterhalts(vorschuss)leistungen (0%)</option>
+                </select>
+              </div>
+              <label class="col-sm-2 control-label">Einkommenshöhe</label>
+              <div class="col-sm-3">
+                <div class="input-group">
+                  <input type="text" name="höhe" class="form-control" min="0" step="100">
+                  <div class="input-group-addon"> €</div>
+                </div>
+              </div>
+              <div class="col-sm-1">
+                <button type="button" class="removeEinkommen btn btn-danger">
+                  <span class="glyphicon glyphicon-remove"></span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </form>
+
+      <div class="row">
+        <div class="col-sm-5"><hr></div>
+        <div class="col-sm-2">
+          <button type="button" id="calc" class="btn btn-primary">
+            <span class="glyphicon glyphicon-modal-window"></span>
+            Berechnen
+          </button>
+        </div>
+        <div class="col-sm-5"><hr></div>
+      </div>
+
+      <div class="row gebuehreninfo">
+        <div class="alert alert-info" id="gebühr" role="alert"></div>
+      </div>
+
+      <div class="row berechnung">
+        <div class="col-sm-3">
+          <h5>
+            Die Berechnung ist erfolgt ohne Gewähr, gültig
+            ist allein der Gebührenbescheid der Stadt Jena.
+          </h5>
+        </div>
+
+        <div role="tabpanel" class="berechnungsTab col-sm-9">
+          <!-- Nav tabs -->
+          <ul class="nav nav-tabs" role="tablist">
+            <li role="presentation" class="active">
+              <a href="#Geb20150520" aria-controls="Geb20150520" role="tab" data-toggle="tab">
+                Neue Gebühr (vom 20.05.2015)
+              </a>
+            </li>
+            <li role="presentation">
+              <a href="#Geb20100127" aria-controls="Geb20100127" role="tab" data-toggle="tab">
+                Alte Gebühr (vom 27.01.2010)
+              </a>
+            </li>
+          </ul>
+
+          <!-- Tab panes -->
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane active" id="Geb20150520">
+              <pre id="resultNeu"></pre>
+            </div>
+            <div role="tabpanel" class="tab-pane" id="Geb20100127">
+              <pre id="resultAlt"></pre>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+    <hr>
+    <small>©2015 Dies ist eine private Seite von Berengar Lehr, erreichbar über <em>admin</em>(at)DOMAINNAME</small>
+  </body>
+</html>
