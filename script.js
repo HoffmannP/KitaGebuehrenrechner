@@ -8,31 +8,35 @@ accounting.settings = {
 
 var numform = accounting.formatNumber.bind(accounting);
 
+function showModal() {
+  $('#info-modal').modal();
+}
 function betreuungszeitenAnzeigen() {
-  $('.einKind').show();
+  $('div.einKind').show();
   switch (+$('.kinderzahl input:radio:checked').val()) {
     case 3:
-      $('.dreiKinder').show();
-      $('.zweiKinder').show();
+      $('div.dreiKinder').show();
+      $('div.zweiKinder').show();
       break;
     case 2:
-      $('.dreiKinder').hide();
-      $('.zweiKinder').show();
+      $('div.dreiKinder').hide();
+      $('div.zweiKinder').show();
       break;
     case 1:
-      $('.dreiKinder').hide();
-      $('.zweiKinder').hide();
+      $('div.dreiKinder').hide();
+      $('div.zweiKinder').hide();
       break;
   }
 }
 
-function einkommenHinzufügen(art, höhe) {
+function einkommenHinzufügen(event, art, höhe) {
   var template = $('.einkommen-template').clone();
   template.removeClass('einkommen-template');
   if (art) {
     template.find('select.einkommensart').val(art);
   }
   if (höhe) {
+    console.log('Höhe'. höhe);
     template.find('input[name="höhe"]').val(höhe);
   }
   $('.einkommensliste').append(template);
@@ -192,7 +196,7 @@ function GebührText(gebührNeu, gebührAlt) {
   }
   return sprintf(
     'Die berechnete Gebühr beträgt <strong>%d</strong> €. <small>Das ist eine <em>%s</em> um <strong>%d</strong> €' +
-    ' (%d %%) gegenüber der alten Gebühr von %d €</small>',
+    ' (%d %%) gegenüber der alten Gebühr von %d €</small>.',
     gebührNeu,
     gebührNeu > gebührAlt ? 'Erhöhung' : 'Verringerung',
     Math.abs(gebührNeu - gebührAlt),
@@ -212,33 +216,63 @@ function LokalLaden() {
   if (!window.localStorage) {
     return;
   }
-  var Betreuungszeiten = window.localStorage.getItem('Betreuungszeiten'),
-  Einkommen = window.localStorage.getItem('Einkommen');
+  var Betreuungszeiten = JSON.parse(window.localStorage.Betreuungszeiten),
+  Einkommen = JSON.parse(window.localStorage.Einkommen);
   if (!Betreuungszeiten || !Einkommen) {
-    return;
+    return false;
   }
-  Betreuungszeiten = JSON.parse(Betreuungszeiten);
-  Einkommen = JSON.parse(Einkommen);
 
   zeiten = $('input[name="zeit"]');
   for (var i = 0, l = Betreuungszeiten.length; i < l; i++) {
-    zeiten.eq(i).val(Betreuungszeiten[i]);
+    if (Betreuungszeiten[i] != 9) {
+      zeiten.eq(i).val(Betreuungszeiten[i]);
+    }
   }
   $('input[name="kinderzahl"][value="' + l + '"]').click();
 
   template = $('.einkommen-template');
   for (i = 0, l = Einkommen.length; i < l; i++) {
-    einkommenHinzufügen(Einkommen[i].Art, Einkommen[i].Höhe);
+    einkommenHinzufügen(null, Einkommen[i].Art, Einkommen[i].Höhe);
   }
+
+  return true;
+}
+
+function LokalLoeschen() {
+  window.localStorage.setItem('Betreuungszeiten', null);
+  window.localStorage.setItem('Einkommen', null);
+  window.alert('Daten gelöscht');
+}
+
+function maillink() {
+  var coded = 'rIwi1ri@NoJ3W1i7.R9',
+  key = '4hI3QDaUx2HtqEWTm9GLJgKM61cv5dinkfYSOs8AzCZb0opBRNwrPjXFylu7eV',
+  shift = coded.length,
+  link = '';
+  for (var i = 0, l = coded.length; i < l; i++) {
+    if (key.indexOf(coded.charAt(i)) == -1) {
+      ltr = coded.charAt(i);
+      link += (ltr);
+    } else {
+      ltr = (key.indexOf(coded.charAt(i)) - shift + key.length) % key.length;
+      link += (key.charAt(ltr));
+    }
+  }
+  return link;
 }
 
 function main() {
+  $('#info').click(showModal);
   $('.kinderzahl input:radio')
     .change(betreuungszeitenAnzeigen);
-  LokalLaden();
   $('#einkommenHinzufügen').click(einkommenHinzufügen);
   $('.einkommensliste').on('click', 'button.removeEinkommen', removeEinkommen);
   $('#calc').click(berechnen);
+  $('#datenLoeschen').click(LokalLoeschen);
+  if (LokalLaden()) {
+    berechnen();
+  }
+  $('#email').attr('href', 'mailto:' + maillink());
 }
 
 $(main);

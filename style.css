@@ -11,3 +11,7 @@ pre {
   background: none;
   border-top: none;
 }
+
+.modal-dialog {
+    width: 1024px;
+}

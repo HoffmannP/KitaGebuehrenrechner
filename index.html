@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Unverbindliche Kitagebührenberechnung für Jena nach der Gebührenerhöhung</title>
+    <title>KiTa-Gebührenrechner für Jena</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap-theme.min.css">
     <script src="http://code.jquery.com/jquery-2.1.4.min.js"></script>
@@ -35,17 +35,18 @@
   <body>
     <main class="container">
       <div class="page-header">
-        <h1>KiTa-Gebührenrechner Jena 2015</h1>
+        <h1>
+          KiTa-Gebührenrechner für Jena
+          <small><span id="info" class="text-info glyphicon glyphicon-info-sign"></span></small>
+        </h1>
         <h4>
-          Unverbindlicher Gebührenberechner für die KitaGebühren nach der
-          am 20.05.2015 beschlossenen Änderung der Gebührensatzung der
-          Stadt Jena. <strong>Die Ergebnisse sind ohne Gewähr.</strong>
+          <mark>&nbsp;Die Berechnung erfolgt ohne Gewähr!&nbsp;</mark>
         </h4>
       </div>
       <form id="kitageb" class="form-horizontal">
         <div class="form-group kinderzahl">
           <label class="col-sm-3 control-label">
-            Wählen Sie die Zahl der Kinder in einer Kindertageseinrichtung:
+            Zahl der Kinder in einer Kindertageseinrichtung/Tagespflege:
           </label>
           <div class="col-sm-3">
             <label class="radio-inline">
@@ -69,7 +70,7 @@
 
         <div class="form-group betreuungszeit">
           <label class="col-sm-3 control-label">
-            <p>Geben Sie die Betruungszeit an:</p>
+            <p>Vereinbarte Betreuungszeit:</p>
           </label>
           <div class="col-sm-3 einKind">
             <div class="input-group">
@@ -93,7 +94,7 @@
 
         <div class="form-group einkommen">
           <label class="col-sm-3 control-label">
-            <p>Geben Sie ihre monatlichen Durchschnittseinkommen an:</p>
+            <p>monatliche Durchschnittseinkommen:</p>
             <button type="button" id="einkommenHinzufügen" class="btn btn-default">
               <span class="glyphicon glyphicon-plus"></span> Hinzufügen
             </button>
@@ -102,12 +103,12 @@
             <div class="row eintrag einkommen-template">
               <div class="col-sm-6">
                 <select class="einkommensart form-control">
-                  <option selected disabled>Wählen Sie die Einkommensart (Pauschalabzug)</option>
+                  <option disabled selected>Wählen Sie die Einkommensart (Pauschalabzug)</option>
                   <option value="40">Steuer- und sozialversicherungspflichtig (40%)</option>
                   <option value="25">Beamtenbezüge (25%)</option>
                   <option value="30">Lediglich steuer- oder sozialversicherungspflichtig (30%)</option>
                   <option value="5">Weder steuer- noch sozialversicherungspflichtig (5%)</option>
-                  <option value="0">Sozialleistungen, Elterngeld, Kindergeld, Unterhalts(vorschuss)leistungen (0%)</option>
+                  <option value="0">Kinder- &amp; Elterngeld, Sozial- &amp; Unterhalts(vorschuss)leistungen (0%)</option>
                 </select>
               </div>
               <label class="col-sm-2 control-label">Einkommenshöhe</label>
@@ -178,7 +179,66 @@
       </div>
 
     </main>
-    <hr>
-    <small>©2015 Dies ist eine private Seite von Berengar Lehr, erreichbar über <em>admin</em>(at)DOMAINNAME</small>
+
+    <div id="info-modal" class="modal fade">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header bg-success">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title">Über den KiTa-Gebührenrechner</h4>
+          </div>
+          <div class="modal-body">
+            <h4>Haftungsausschluss</h4>
+            <p>
+              Diese Seite gibt keine rechtsverbindliche Auskunft, sondern stellt eine Rechenhilfe da. Niemand übernimmt irgendwelche
+              Verantwortung für die Richtigkeit des Ergebnisses. Die Seite ist wie ein Abakus, wenn der nicht funktioniert würden Sie
+              ihn auch aus dem Fenster schmeißen und nicht den Hersteller verklagen.
+            </p>
+            <h4>Herkunft</h4>
+            <p>
+              Die private Seite wurde erstellt von Berengar Lehr (selbst Betroffen) und steht in keinerlei Verbindung zur Stadt Jena
+              oder ihren Eigenbetrieben, Angestellten oder sonstigen Einrichtungen.
+            </p>
+            <h4>Datenschutz</h4>
+            <p>
+              Die Daten, die Sie in das Formular eingeben, verlassen ihren Browser nicht. Sämtliche Berechnungen finden nur
+              innerhalb Ihres des Browsers statt, die Berechnung funktioniert auch ohne Internetverbindung. Die eingegebenen Daten werden auf Ihrem Browser gespeichert um bei einem erneuten Besuch die selben Daten nicht wieder eingeben zu müssen. <button id="datenLoeschen" type="button" class="btn btn-warning btn-xs">Daten löschen</button>
+            </p>
+            <h4>Lizenz</h4>
+            <p>Copyright © 2015 Berengar W. Lehr.</p>
+            <p>
+              Zur Nutzung von Elementen und/oder des Gesamtwerks im Sinne des Urheberrechts stehen die beiden folgende Lizenzen zur Verfügung:
+            </p>
+            <ul>
+              <li><a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/"><img alt="Creative Commons Lizenzvertrag" style="border-width:0" src="https://i.creativecommons.org/l/by-nc/4.0/80x15.png" /> </a> <span xmlns:dct="http://purl.org/dc/terms/" property="dct:title">KiTa-GebührenRechner</span> von <span xmlns:cc="http://creativecommons.org/ns#" property="cc:attributionName">Berengar W. Lehr</span> ist lizenziert unter einer <a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/">Creative Commons Namensnennung-Nicht kommerziell 4.0 International Lizenz</a>.</li>
+              <li>Der KiTa-Gebührenrechner ist Freie Software: Sie können es unter den Bedingungen der GNU General Public License, wie von der Free Software Foundation, <a href="http://www.gnu.org/licenses/gpl-3.0.de.html">Version 3 der Lizenz</a> oder (nach Ihrer Wahl) jeder neueren veröffentlichten Version, weiterverbreiten und/oder modifizieren.</li>
+            </ul>
+            <h4>Externe Ressourcen</h4>
+            <ul>
+              <li><a href="http://getbootstrap.com/">Bootstrap</a></li>
+              <li><a href="http://glyphicons.com/">Glyphicons</a></li>
+              <li><a href="http://jquery.com/">jQuery</a></li>
+              <li><a href="https://github.com/alexei/sprintf.js">sprintf.js</a></li>
+              <li><a href="http://openexchangerates.github.io/accounting.js/">accounting.js</a></li>
+              <li><a href="http://www.jottings.com/obfuscator.htm">E-Mail Obfuscator</a></li>
+            </ul>
+            <h4>Kontakt &amp; Fehler</h4>
+            <ul>
+              <li>Der Quellcode wird auf <a href="https://github.com/HoffmannP/KitaGebuehrenrechner">GitHub</a> gehostet</li>
+              <li>Bitte hier <a href="https://github.com/HoffmannP/KitaGebuehrenrechner/issues/new">Fehler melden</a></li>
+              <li>Als letzte Option empfange ich Mails unter <a id="email">
+                kon<span class="einKind">mein</span>takt@ich<span class="zweiKinder">schon</span>platz.de
+              </a></li>
+            </ul>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">
+              <span class="glyphicon glyphicon-remove"></span>
+              Schließen
+            </button>
+          </div>
+        </div><!-- /.modal-content -->
+      </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
   </body>
 </html>
