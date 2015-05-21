@@ -91,7 +91,8 @@ function Verarbeitung(Daten, Parameter) {
   Gebühr,
   einzelGebühr,
   betreuungsDifferenz,
-  gesamtGebühr = 0;
+  gesamtGebühr = 0,
+  hr = '        ---------------------------------------<br>';
 
   text += '<em>1) zu berücksichtigtigendes, bereinigtes Einkommen</em><br>';
   text += '        Angegeben      Pauschale      Bereinigt<br>';
@@ -105,7 +106,7 @@ function Verarbeitung(Daten, Parameter) {
       numform(bereinigtesEinkommen)
     );
   }
-  text += '        ---------------------------------------<br>';
+  text += hr;
   text += sprintf(
     '        <strong>Gesamt</strong>:                     %9s €<br>',
     numform(Einkommen));
@@ -129,7 +130,7 @@ function Verarbeitung(Daten, Parameter) {
       i + 1,
       accounting.formatNumber(Parameter.Freibeträge[i]));
   }
-  text += '        ---------------------------------------<br>';
+  text += hr;
   text += sprintf(
     '        <strong>Gesamt</strong>:                     %9s €<br>',
     numform(Einkommen));
@@ -167,7 +168,7 @@ function Verarbeitung(Daten, Parameter) {
       numform(Math.abs(betreuungsDifferenz * 100, {precision:1})),
       numform(einzelGebühr));
   }
-  text += '        ---------------------------------------<br>';
+  text += hr;
   text += sprintf(
     '        <strong>Gesamt</strong>:                     %9s €<br>',
     numform(gesamtGebühr));

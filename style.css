@@ -1,9 +1,7 @@
 .einKind, .zweiKinder, .dreiKinder, .einkommen-template, .gebuehreninfo, .berechnung {
   display: none;
 }
-mark {
-  z-index: -1;
-}
+
 div.row {
   margin-bottom: 15px;
 }
