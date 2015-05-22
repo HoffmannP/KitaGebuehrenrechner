@@ -29,9 +29,16 @@ kindergeld = function(i) {
 
 var numform = accounting.formatNumber.bind(accounting);
 
+function handleEnter(e) {
+  if ((e.keyCode == 13) && ($(e.target).attr('id') != 'einkommenHinzufügen')) {
+    berechnen();
+  }
+}
+
 function showModal() {
   $('#info-modal').modal();
 }
+
 function betreuungszeitenAnzeigen() {
   $('.has-erro').removeClass('.has-error');
   $('.betreuungszeit .einKind').show();
@@ -350,6 +357,7 @@ function maillink() {
 }
 
 function main() {
+  $('form').keyup(handleEnter);
   $('#info').click(showModal);
   $('input[name="inBetreuung"]')
     .change(betreuungszeitenAnzeigen);
