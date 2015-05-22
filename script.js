@@ -102,13 +102,21 @@ function Vorbereitung() {
 
   var alleZeiten = [],
   zeit = +$('input[name="inBetreuung"]:checked').val(),
-  zeiten = $('input[name="zeit"]');
+  zeiten = $('input[name="zeit"]'),
+  eineZeit;
   if (isNaN(zeit)) {
     $('.zahlInBetreuung').addClass('has-error');
     return false;
   }
   for (i = 0; i < zeit; i++) {
-    alleZeiten[i] = +zeiten.eq(i).val() || 9;
+    eineZeit = zeiten.eq(i).val();
+    if (!eineZeit) {
+      eineZeit = 9;
+    } else if (eineZeit < 0.5) {
+      zeiten.eq(i).parent().addClass('has-error');
+      eineZeit = 9;
+    }
+    alleZeiten[i] = eineZeit;
   }
 
   var kinderzahl = $('input[name="kinderzahl"]').val();
