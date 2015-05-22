@@ -2,7 +2,11 @@
   display: none;
 }
 
-div.row {
+.append {
+    margin-top: -12px;
+}
+
+.row {
   margin-bottom: 15px;
 }
 pre {
@@ -10,6 +14,7 @@ pre {
   border-top: none;
 }
 
-.modal-dialog {
+@media (min-width: 1200px) {
+  .modal-dialog {
     width: 1024px;
 }

@@ -1,1 +1,1 @@
-Siehe [http://ichplatz.de]
+Siehe http://ichplatz.de

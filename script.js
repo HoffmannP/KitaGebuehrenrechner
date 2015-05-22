@@ -6,25 +6,51 @@ accounting.settings = {
   }
 };
 
+var pauschalen = {
+  ssp:  40,
+  beam: 25,
+  sosp: 30,
+  kssp:  5,
+  unth:  0,
+  soz:   0
+},
+abzugEltg = 300.00,
+kindergeld = function(i) {
+  switch (i) {
+    case 1:
+    case 2:
+      return 184;
+    case 3:
+      return 190;
+    default:
+      return 215;
+  }
+};
+
 var numform = accounting.formatNumber.bind(accounting);
 
 function showModal() {
   $('#info-modal').modal();
 }
 function betreuungszeitenAnzeigen() {
-  $('div.einKind').show();
-  switch (+$('.kinderzahl input:radio:checked').val()) {
+  $('.betreuungszeit .einKind').show();
+  var kinderInBetreuung = +$('input[name="inBetreuung"]:checked').val(),
+  kinderzahlInput = $('input[name="kinderzahl"]');
+  if (!kinderzahlInput.val()) {
+    kinderzahlInput.attr('placeholder', kinderInBetreuung);
+  }
+  switch (kinderInBetreuung) {
     case 3:
-      $('div.dreiKinder').show();
-      $('div.zweiKinder').show();
+      $('.betreuungszeit .dreiKinder').show();
+      $('.betreuungszeit .zweiKinder').show();
       break;
     case 2:
-      $('div.dreiKinder').hide();
-      $('div.zweiKinder').show();
+      $('.betreuungszeit .dreiKinder').hide();
+      $('.betreuungszeit .zweiKinder').show();
       break;
     case 1:
-      $('div.dreiKinder').hide();
-      $('div.zweiKinder').hide();
+      $('.betreuungszeit .dreiKinder').hide();
+      $('.betreuungszeit .zweiKinder').hide();
       break;
   }
 }
@@ -36,7 +62,6 @@ function einkommenHinzufügen(event, art, höhe) {
     template.find('select.einkommensart').val(art);
   }
   if (höhe) {
-    console.log('Höhe'. höhe);
     template.find('input[name="höhe"]').val(höhe);
   }
   $('.einkommensliste').append(template);
@@ -66,26 +91,34 @@ function Vorbereitung() {
   for (var i = 0; i < einträge.length; i++) {
     alleEinkommen[i] = {
       Höhe: +einträge.eq(i).find('input[name="höhe"]').val().replace('.', '').replace(',', '.'),
-      Art: +einträge.eq(i).find('select.einkommensart').val()
+      Art: einträge.eq(i).find('select.einkommensart').val()
     };
   }
 
   var alleZeiten = [],
-  zeit = +$('.kinderzahl input:radio:checked').val(),
-  zeiten = $('input[name="zeit"]'),
-  kinder = +$('.kinderzahl input:radio:checked').val();
-  for (i = 0; i < kinder; i++) {
+  zeit = +$('input[name="inBetreuung"]:checked').val(),
+  zeiten = $('input[name="zeit"]');
+  for (i = 0; i < zeit; i++) {
     alleZeiten[i] = +zeiten.eq(i).val() || 9;
   }
+
+  var kinderzahl = $('input[name="kinderzahl"]').val();
+  kinderzahl = kinderzahl ? +kinderzahl : null;
+
   return {
     Betreuungszeiten: alleZeiten,
+    Kinderzahl: kinderzahl,
     Einkommen: alleEinkommen
   };
 }
 
 function Verarbeitung(Daten, Parameter) {
-  var text = '',
+  var Kinderzahl = Daten.Kinderzahl ?
+    +Daten.Kinderzahl :
+    Daten.Betreuungszeiten.length,
+  text = '',
   subtext = '',
+  abzuege,
   bereinigtesEinkommen,
   Einkommen = 0,
   Gebühr,
@@ -97,12 +130,28 @@ function Verarbeitung(Daten, Parameter) {
   text += '<em>1) zu berücksichtigtigendes, bereinigtes Einkommen</em><br>';
   text += '        Angegeben      Pauschale      Bereinigt<br>';
   for (var i = 0, l = Daten.Einkommen.length; i < l; i++) {
-    bereinigtesEinkommen = (1 - (Daten.Einkommen[i].Art / 100)) * Daten.Einkommen[i].Höhe;
+    if (Daten.Einkommen[i].Art == 'eltg') {
+      bereinigtesEinkommen = Math.max(0, Daten.Einkommen[i].Höhe - abzugEltg);
+      subtext = '- ' + numform(abzugEltg) + ' €';
+    } else {
+      abzuege = 1 - pauschalen[Daten.Einkommen[i].Art] / 100;
+      bereinigtesEinkommen = abzuege * Math.max(0, Daten.Einkommen[i].Höhe);
+      subtext = '- ' + pauschalen[Daten.Einkommen[i].Art] + ' %';
+    }
     Einkommen += bereinigtesEinkommen;
     text += sprintf(
-      '        %9s €       - %2d %%    %9s €<br>',
+      '        %9s €   %10s    %9s €<br>',
       numform(Daten.Einkommen[i].Höhe),
-      Daten.Einkommen[i].Art,
+      subtext,
+      numform(bereinigtesEinkommen)
+    );
+  }
+  for (i = 0, l = Kinderzahl; i < l; i++) {
+    bereinigtesEinkommen = kindergeld(i + 1);
+    Einkommen += bereinigtesEinkommen;
+    text += sprintf(
+      '        %9s €        - 0 %%    %9s €<br>',
+      numform(bereinigtesEinkommen),
       numform(bereinigtesEinkommen)
     );
   }
@@ -123,12 +172,12 @@ function Verarbeitung(Daten, Parameter) {
       '        %-19s         %9s €<br>',
       subtext,
       numform(Einkommen));
-  for (i = 0, l = Daten.Betreuungszeiten.length; i < l; i++) {
-    Einkommen -= Parameter.Freibeträge[i];
+  for (i = 0, l = Kinderzahl; i < l; i++) {
+    Einkommen -= Parameter.Freibeträge(i + 1);
     text += sprintf(
-      '        Freibetrag %d. Kind         - %8s €<br>',
+      '        Freibetrag %2d. Kind        - %8s €<br>',
       i + 1,
-      accounting.formatNumber(Parameter.Freibeträge[i]));
+      accounting.formatNumber(Parameter.Freibeträge(i + 1)));
   }
   text += hr;
   text += sprintf(
@@ -136,12 +185,11 @@ function Verarbeitung(Daten, Parameter) {
     numform(Einkommen));
   text += '<br>';
 
-  if (Parameter.minAnrechenbar && (Einkommen < Parameter.minAnrechenbar)) {
-    text += '        Das anrechenbare Einkommen liegt nicht<br>';
+  if (Einkommen < Parameter.minAnrechenbar) {
+    text += '        Das anrechenbare Einkommen liegt nicht über<br>';
     text += sprintf(
-      '        über dem Mindesteinkommen von %s €,<br>',
+      '        %s €, es wird keine Gebühr erhoben.<br>',
       numform(Parameter.minAnrechenbar));
-    text += '        es wird keine Gebühr erhoben!<br>';
     return {
       text: text,
       gebühr: 0
@@ -209,40 +257,49 @@ function LokalSpeichern(Daten) {
   if (!window.localStorage) {
     return;
   }
-  window.localStorage.setItem('Betreuungszeiten', JSON.stringify(Daten.Betreuungszeiten));
-  window.localStorage.setItem('Einkommen', JSON.stringify(Daten.Einkommen));
+  window.localStorage.setItem('KitaGebRechner', JSON.stringify(Daten));
 }
 
 function LokalLaden() {
   if (!window.localStorage) {
     return;
   }
-  var Betreuungszeiten = JSON.parse(window.localStorage.Betreuungszeiten),
-  Einkommen = JSON.parse(window.localStorage.Einkommen);
-  if (!Betreuungszeiten || !Einkommen) {
+  var KitaGebRechner = window.localStorage.getItem('KitaGebRechner');
+  try {
+    KitaGebRechner = JSON.parse(KitaGebRechner);
+  } catch (err) {
+    if (err.name == 'SyntaxError') {
+      LokalLoeschen();
+    }
+    return false;
+  }
+  if (!KitaGebRechner) {
     return false;
   }
 
-  zeiten = $('input[name="zeit"]');
-  for (var i = 0, l = Betreuungszeiten.length; i < l; i++) {
-    if (Betreuungszeiten[i] != 9) {
-      zeiten.eq(i).val(Betreuungszeiten[i]);
+  var zeiten = $('input[name="zeit"]');
+  for (var i = 0, l = KitaGebRechner.Betreuungszeiten.length; i < l; i++) {
+    if (KitaGebRechner.Betreuungszeiten[i] != 9) {
+      zeiten.eq(i).val(KitaGebRechner.Betreuungszeiten[i]);
     }
   }
-  $('input[name="kinderzahl"][value="' + l + '"]').click();
+  $('input[name="inBetreuung"][value="' + l + '"]').click();
 
-  template = $('.einkommen-template');
-  for (i = 0, l = Einkommen.length; i < l; i++) {
-    einkommenHinzufügen(null, Einkommen[i].Art, Einkommen[i].Höhe);
+  $('input[name="kinderzahl"]').val(KitaGebRechner.Kinderzahl);
+
+  var template = $('.einkommen-template');
+  for (i = 0, l = KitaGebRechner.Einkommen.length; i < l; i++) {
+    einkommenHinzufügen(null, KitaGebRechner.Einkommen[i].Art, KitaGebRechner.Einkommen[i].Höhe);
   }
 
   return true;
 }
 
-function LokalLoeschen() {
-  window.localStorage.setItem('Betreuungszeiten', null);
-  window.localStorage.setItem('Einkommen', null);
-  window.alert('Daten gelöscht');
+function LokalLoeschen(silent) {
+  window.localStorage.removeItem('KitaGebRechner');
+  if (!!silent) {
+    window.alert('Daten gelöscht');
+  }
 }
 
 function maillink() {
@@ -264,7 +321,7 @@ function maillink() {
 
 function main() {
   $('#info').click(showModal);
-  $('.kinderzahl input:radio')
+  $('input[name="inBetreuung"]')
     .change(betreuungszeitenAnzeigen);
   $('#einkommenHinzufügen').click(einkommenHinzufügen);
   $('.einkommensliste').on('click', 'button.removeEinkommen', removeEinkommen);

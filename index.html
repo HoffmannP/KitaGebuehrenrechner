@@ -11,25 +11,35 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/sprintf/1.0.1/sprintf.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/accounting.js/0.4.1/accounting.min.js"></script>
-    <script src="script.min.js"></script>
+    <script src="script.js"></script>
     <link rel="stylesheet" href="style.css">
     <script>
-      Parameter = {
-        Neu: {
-          maximalEinkommen: 2861,
-          Freibeträge: [1130, 400, 400],
-          Gebührensatz: 13,
-          minAnrechenbar: false,
-          BetreuungsDifferenzFaktor: 1,
-        },
-        Alt: {
-          maximalEinkommen: 2592,
-          Freibeträge: [1130, 300, 300],
-          Gebührensatz: 13,
-          minAnrechenbar: 150,
-          BetreuungsDifferenzFaktor: .5
-        }
-      };
+Parameter = {
+  Neu: {
+    maximalEinkommen: 2861,
+    Freibeträge: function(i) {
+      if (i == 1) {
+        return 1130;
+      }
+      return 400;
+    },
+    Gebührensatz: 13,
+    minAnrechenbar: 0,
+    BetreuungsDifferenzFaktor: 1,
+  },
+  Alt: {
+    maximalEinkommen: 2592,
+    Freibeträge: function(i) {
+      if (i == 1) {
+        return 1130;
+      }
+      return 300;
+    },
+    Gebührensatz: 13,
+    minAnrechenbar: 150,
+    BetreuungsDifferenzFaktor: 0.5
+  }
+};
     </script>
   </head>
   <body>
@@ -44,25 +54,25 @@
         </h4>
       </div>
       <form id="kitageb" class="form-horizontal">
-        <div class="form-group kinderzahl">
+        <div class="form-group zahlInBetreuung">
           <label class="col-sm-3 control-label">
-            Zahl der Kinder in einer Kindertageseinrichtung/Tagespflege:
+            Zahl der Kinder <em>in einer Kindertageseinrichtung/Tagespflege</em>:
           </label>
           <div class="col-sm-3">
             <label class="radio-inline">
-              <input type="radio" name="kinderzahl" value="1">
+              <input type="radio" name="inBetreuung" value="1">
               Ein Kind
             </label>
           </div>
           <div class="col-sm-3">
             <label class="radio-inline">
-              <input type="radio" name="kinderzahl" value="2">
+              <input type="radio" name="inBetreuung" value="2">
               Zwei Kinder
             </label>
           </div>
           <div class="col-sm-3">
             <label class="radio-inline">
-              <input type="radio" name="kinderzahl" value="3">
+              <input type="radio" name="inBetreuung" value="3">
               Drei Kinder oder mehr
             </label>
           </div>
@@ -92,9 +102,19 @@
           </div>
         </div>
 
+        <div class="form-group anzahlKinder">
+          <label class="col-sm-3 control-label">
+            <p>Anzahl kindergeldberechtigter Kinder:</p>
+          </label>
+          <div class="col-sm-1">
+            <input type="number" name="kinderzahl" class="form-control" min="1" step="1">
+          </div>
+        </div>
+
         <div class="form-group einkommen">
           <label class="col-sm-3 control-label">
             <p>monatliche Durchschnittseinkommen:</p>
+            <p class="append"><small class="text-info">Kindergeld wird automatisch berücksichtigt</small></p>
             <button type="button" id="einkommenHinzufügen" class="btn btn-default">
               <span class="glyphicon glyphicon-plus"></span> Hinzufügen
             </button>
@@ -104,17 +124,19 @@
               <div class="col-sm-6">
                 <select class="einkommensart form-control">
                   <option disabled selected>Wählen Sie die Einkommensart (Pauschalabzug)</option>
-                  <option value="40">Steuer- und sozialversicherungspflichtig (40%)</option>
-                  <option value="25">Beamtenbezüge (25%)</option>
-                  <option value="30">Lediglich steuer- oder sozialversicherungspflichtig (30%)</option>
-                  <option value="5">Weder steuer- noch sozialversicherungspflichtig (5%)</option>
-                  <option value="0">Kinder- &amp; Elterngeld, Sozial- &amp; Unterhalts(vorschuss)leistungen (0%)</option>
+                  <option value="ssp">Steuer- und sozialversicherungspflichtig (40%)</option>
+                  <option value="beam">Beamtenbezüge (25%)</option>
+                  <option value="sosp">Lediglich steuer- oder sozialversicherungspflichtig (30%)</option>
+                  <option value="kssp">Weder steuer- noch sozialversicherungspflichtig (5%)</option>
+                  <option value="eltg">Elterngeld (0%, über 300€)</option>
+                  <option value="unth">Unterhalts(vorschuss)leistungen (0%)</option>
+                  <option value="soz">Sozialleistungen (z.B. Wohngeld, ALG I, Renten) (0%)</option>
                 </select>
               </div>
               <label class="col-sm-2 control-label">Einkommenshöhe</label>
               <div class="col-sm-3">
                 <div class="input-group">
-                  <input type="text" name="höhe" class="form-control" min="0" step="100">
+                  <input type="text" name="höhe" class="form-control">
                   <div class="input-group-addon"> €</div>
                 </div>
               </div>
@@ -146,8 +168,7 @@
       <div class="row berechnung">
         <div class="col-sm-3">
           <h5>
-            Die Berechnung ist erfolgt ohne Gewähr, gültig
-            ist allein der Gebührenbescheid der Stadt Jena.
+            Die Berechnung ist erfolgt ohne Gewähr, gültig ist allein der Gebührenbescheid der Stadt Jena.
           </h5>
         </div>
 
@@ -197,7 +218,7 @@
             <h4>Herkunft</h4>
             <p>
               Die private Seite wurde erstellt von Berengar Lehr (selbst Betroffen) und steht in keinerlei Verbindung zur Stadt Jena
-              oder ihren Eigenbetrieben, Angestellten oder sonstigen Einrichtungen.
+              oder ihren Eigenbetrieben, Angestellten oder sonstigen Einrichtungen. Es gibt einen <a target="_new" href="https://egov.jena.de/kitagebuehr/index.php">offiziellen Gebührenrechner</a> der Stadt Jena.
             </p>
             <h4>Datenschutz</h4>
             <p>
