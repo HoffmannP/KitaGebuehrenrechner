@@ -1,0 +1,15 @@
+/* TEAM */
+    Work:    Berengar W. Lehr.
+    Twitter: @Hoffmann
+    From:    Jena, Germany
+
+/* THANKS */
+    Testing: Hannes
+    Twitter: @hrsnkrmpfl
+
+/* SITE */
+    Last update: 2015/05/23
+    Language: Deutsch
+    Standards: HTML5, CSS3, ECMAScript 5
+    Supports: IE>9
+    Editor: Sublime-Text 3
