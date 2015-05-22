@@ -131,7 +131,8 @@ function Vorbereitung() {
       einträge.eq(i).addClass('has-warning');
       continue;
     }
-    höhe = einträge.eq(i).find('input[name="höhe"]').val().replace('.', '').replace(',', '.');
+    höhe = einträge.eq(i).find('input[name="höhe"]').val()
+      .replace('.', '').replace(',', '.');
     if (+höhe <= 0) {
       einträge.eq(i).addClass('has-warning');
       continue;
@@ -289,7 +290,8 @@ function GebührText(gebührNeu, gebührAlt) {
       gebührNeu);
   }
   return sprintf(
-    'Die berechnete Gebühr beträgt <strong>%d</strong> €. <small>Das ist eine <em>%s</em> um <strong>%d</strong> €' +
+    'Die berechnete Gebühr beträgt <strong>%d</strong> €. ' +
+    '<small>Das ist eine <em>%s</em> um <strong>%d</strong> €' +
     ' (%d %%) gegenüber der alten Gebühr von %d €</small>.',
     gebührNeu,
     gebührNeu > gebührAlt ? 'Erhöhung' : 'Verringerung',
@@ -334,7 +336,10 @@ function LokalLaden() {
 
   var template = $('.einkommen-template');
   for (i = 0, l = KitaGebRechner.Einkommen.length; i < l; i++) {
-    einkommenHinzufügen(null, KitaGebRechner.Einkommen[i].Art, KitaGebRechner.Einkommen[i].Höhe);
+    einkommenHinzufügen(
+      null,
+      KitaGebRechner.Einkommen[i].Art,
+      KitaGebRechner.Einkommen[i].Höhe);
   }
 
   return true;
