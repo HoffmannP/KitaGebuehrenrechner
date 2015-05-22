@@ -33,6 +33,7 @@ function showModal() {
   $('#info-modal').modal();
 }
 function betreuungszeitenAnzeigen() {
+  $('.has-erro').removeClass('.has-error');
   $('.betreuungszeit .einKind').show();
   var kinderInBetreuung = +$('input[name="inBetreuung"]:checked').val(),
   kinderzahlInput = $('input[name="kinderzahl"]');
@@ -72,8 +73,11 @@ function removeEinkommen(e) {
 }
 
 function berechnen() {
-  var Daten = Vorbereitung(),
-  ErgebnisNeu = Verarbeitung(Daten, Parameter.Neu),
+  var Daten = Vorbereitung();
+  if (!Daten) {
+    return;
+  }
+  var ErgebnisNeu = Verarbeitung(Daten, Parameter.Neu),
   ErgebnisAlt = Verarbeitung(Daten, Parameter.Alt);
   LokalSpeichern(Daten);
 
@@ -86,24 +90,42 @@ function berechnen() {
 }
 
 function Vorbereitung() {
-  var alleEinkommen = [],
-  einträge = $('.eintrag').not('.einkommen-template');
-  for (var i = 0; i < einträge.length; i++) {
-    alleEinkommen[i] = {
-      Höhe: +einträge.eq(i).find('input[name="höhe"]').val().replace('.', '').replace(',', '.'),
-      Art: einträge.eq(i).find('select.einkommensart').val()
-    };
-  }
+  $('.has-error').removeClass('has-error');
+  $('.has-warning').removeClass('has-warning');
 
   var alleZeiten = [],
   zeit = +$('input[name="inBetreuung"]:checked').val(),
   zeiten = $('input[name="zeit"]');
+  if (isNaN(zeit)) {
+    $('.zahlInBetreuung').addClass('has-error');
+    return false;
+  }
   for (i = 0; i < zeit; i++) {
     alleZeiten[i] = +zeiten.eq(i).val() || 9;
   }
 
   var kinderzahl = $('input[name="kinderzahl"]').val();
   kinderzahl = kinderzahl ? +kinderzahl : null;
+
+  var alleEinkommen = [],
+  einträge = $('.eintrag').not('.einkommen-template'),
+  art, höhe;
+  for (var i = 0; i < einträge.length; i++) {
+    art = einträge.eq(i).find('select.einkommensart').val();
+    if (!(art in pauschalen) && (art != 'eltg')) {
+      einträge.eq(i).addClass('has-warning');
+      continue;
+    }
+    höhe = einträge.eq(i).find('input[name="höhe"]').val().replace('.', '').replace(',', '.');
+    if (+höhe <= 0) {
+      einträge.eq(i).addClass('has-warning');
+      continue;
+    }
+    alleEinkommen[i] = {
+      Art: art,
+      Höhe: +höhe
+    };
+  }
 
   return {
     Betreuungszeiten: alleZeiten,
@@ -185,7 +207,15 @@ function Verarbeitung(Daten, Parameter) {
     numform(Einkommen));
   text += '<br>';
 
-  if (Einkommen < Parameter.minAnrechenbar) {
+  if (Einkommen <= 0) {
+    text += '        Kein anrechenbares Einkommen, es wird keine Gebühr erhoben<br>';
+    return {
+      text: text,
+      gebühr: 0
+    };
+  }
+
+  if (Parameter.minAnrechenbar && (Einkommen < Parameter.minAnrechenbar)) {
     text += '        Das anrechenbare Einkommen liegt nicht über<br>';
     text += sprintf(
       '        %s €, es wird keine Gebühr erhoben.<br>',
