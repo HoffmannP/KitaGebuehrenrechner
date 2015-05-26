@@ -40,7 +40,7 @@ function showModal() {
 }
 
 function betreuungszeitenAnzeigen() {
-  $('.has-erro').removeClass('.has-error');
+  $('.has-error').removeClass('.has-error');
   $('.betreuungszeit .einKind').show();
   var kinderInBetreuung = +$('input[name="inBetreuung"]:checked').val(),
   kinderzahlInput = $('input[name="kinderzahl"]');
@@ -81,8 +81,13 @@ function removeEinkommen(e) {
 
 function berechnen() {
   var Daten = Vorbereitung();
+
+  console.log(Daten);
+
   if (!Daten) {
-    return;
+    $('.berechnung').hide();
+    $('.gebuehreninfo').hide();
+    return false;
   }
   var ErgebnisNeu = Verarbeitung(Daten, Parameter.Neu),
   ErgebnisAlt = Verarbeitung(Daten, Parameter.Alt);
@@ -91,14 +96,12 @@ function berechnen() {
   $('#resultNeu').html(ErgebnisNeu.text);
   $('#resultAlt').html(ErgebnisAlt.text);
   $('#gebühr').html(GebührText(ErgebnisNeu.gebühr, ErgebnisAlt.gebühr));
-  $('.berechnungsTab').tab();
   $('.berechnung').show();
   $('.gebuehreninfo').show();
 }
 
 function Vorbereitung() {
   $('.has-error').removeClass('has-error');
-  $('.has-warning').removeClass('has-warning');
 
   var alleZeiten = [],
   zeit = +$('input[name="inBetreuung"]:checked').val(),
@@ -124,18 +127,26 @@ function Vorbereitung() {
 
   var alleEinkommen = [],
   einträge = $('.eintrag').not('.einkommen-template'),
-  art, höhe;
+  art, höhe, fehler;
   for (var i = 0; i < einträge.length; i++) {
-    art = einträge.eq(i).find('select.einkommensart').val();
-    if (!(art in pauschalen) && (art != 'eltg')) {
-      einträge.eq(i).addClass('has-warning');
-      continue;
-    }
+    fehler = false;
     höhe = einträge.eq(i).find('input[name="höhe"]').val()
       .replace('.', '').replace(',', '.');
     if (+höhe <= 0) {
-      einträge.eq(i).addClass('has-warning');
-      continue;
+      fehler = true;
+    }
+    art = einträge.eq(i).find('select.einkommensart').val();
+    if (!(art in pauschalen) && (art != 'eltg')) {
+      if (fehler) {
+        einträge.eq(i).find('button.removeEinkommen').click();
+        continue;
+      } else {
+        einträge.eq(i).find('select.einkommensart').parent().addClass('has-error');
+        return false;
+      }
+    } else if (fehler) {
+      einträge.eq(i).find('input[name="höhe"]').parent().addClass('has-error');
+      return false;
     }
     alleEinkommen[i] = {
       Art: art,
@@ -381,6 +392,7 @@ function main() {
   if (LokalLaden()) {
     berechnen();
   }
+  $('.berechnungsTab').tab();
   $('#email').attr('href', 'mailto:' + maillink());
 }
 

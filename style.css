@@ -3,7 +3,7 @@
 }
 
 .append {
-    margin-top: -12px;
+  margin-top: -12px;
 }
 
 .row {
@@ -17,4 +17,11 @@ pre {
 @media (min-width: 1200px) {
   .modal-dialog {
     width: 1024px;
+  }
+}
+
+.copyright {
+  position: absolute;
+  left: 5px;
+  bottom: 5px;
 }
