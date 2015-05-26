@@ -81,9 +81,6 @@ function removeEinkommen(e) {
 
 function berechnen() {
   var Daten = Vorbereitung();
-
-  console.log(Daten);
-
   if (!Daten) {
     $('.berechnung').hide();
     $('.gebuehreninfo').hide();
