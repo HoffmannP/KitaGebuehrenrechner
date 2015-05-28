@@ -279,8 +279,8 @@ function Verarbeitung(Daten, Parameter) {
 
   if (gesamtGebühr < mindestGebühr) {
     text += sprintf(
-      '        <em>KiTa-Gebühren unter %.2f € werden nicht erhoben.</em><br>',
-      mindestGebühr);
+      '        <em>KiTa-Gebühren unter %s € werden nicht erhoben.</em><br>',
+      numform(mindestGebühr));
     gesamtGebühr = 0;
   } else {
     text += sprintf(
