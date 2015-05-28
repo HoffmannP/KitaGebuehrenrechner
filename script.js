@@ -171,6 +171,7 @@ function Verarbeitung(Daten, Parameter) {
   einzelGebühr,
   betreuungsDifferenz,
   gesamtGebühr = 0,
+  mindestGebühr = 20,
   hr = '        ---------------------------------------<br>';
 
   text += '<em>1) zu berücksichtigtigendes, bereinigtes Einkommen</em><br>';
@@ -276,8 +277,10 @@ function Verarbeitung(Daten, Parameter) {
     numform(gesamtGebühr));
   text += '<br>';
 
-  if (gesamtGebühr < 10) {
-    text += '        <em>KiTa-Gebühren unter 20,00 € werden nicht erhoben.</em><br>';
+  if (gesamtGebühr < mindestGebühr) {
+    text += sprintf(
+      '        <em>KiTa-Gebühren unter %s € werden nicht erhoben.</em><br>',
+      numform(mindestGebühr));
     gesamtGebühr = 0;
   } else {
     text += sprintf(
@@ -300,11 +303,13 @@ function GebührText(gebührNeu, gebührAlt) {
   return sprintf(
     'Die berechnete Gebühr beträgt <strong>%d</strong> €. ' +
     '<small>Das ist eine <em>%s</em> um <strong>%d</strong> €' +
-    ' (%d %%) gegenüber der alten Gebühr von %d €</small>.',
+    '%s gegenüber der alten Gebühr von %d €</small>.',
     gebührNeu,
     gebührNeu > gebührAlt ? 'Erhöhung' : 'Verringerung',
     Math.abs(gebührNeu - gebührAlt),
-    Math.round(Math.abs(gebührNeu - gebührAlt) / gebührAlt * 100),
+    gebührAlt === 0 ? '' : sprintf(
+        ' (%s %%)',
+        Math.round(Math.abs(gebührNeu - gebührAlt) / gebührAlt * 100)),
     gebührAlt);
 }
 
@@ -377,7 +382,76 @@ function maillink() {
   return link;
 }
 
+function test() {
+  var daten = function(zeiten, höhe, art) {
+    return {
+      'Betreuungszeiten': zeiten,
+      'Kinderzahl': zeiten.length,
+      'Einkommen': [{'Art': art || 'unth', 'Höhe': höhe || 99999}]
+    };
+  }, soll, ist, arten = ['Alt', 'Neu'],
+  Test = [
+    {
+      'Daten': daten([9]),
+      'Gebühr': {'Alt': 1 * 190, 'Neu': 1 * 225}
+    },
+    {
+      'Daten': daten([9, 9]),
+      'Gebühr': {'Alt': 2 * 151, 'Neu': 2 * 173}
+    },
+    {
+      'Daten': daten([9, 9, 9]),
+      'Gebühr': {'Alt': 3 * 112, 'Neu': 3 * 121}
+    },
+    {
+      'Daten': daten([9, 8], 5100, 'ssp'),
+      'Gebühr': {'Alt': 294, 'Neu': 327}
+    },
+    {
+      'Daten': {
+        'Betreuungszeiten':[9],
+        'Kinderzahl': null,
+        'Einkommen': [{'Art': 'soz', 'Höhe': 1130}]
+      },
+      'Gebühr': {'Alt': 24, 'Neu': 24}
+    },
+    {
+      'Daten': daten([9, 9], 1200),
+      'Gebühr': {'Alt': 0, 'Neu': 0}
+    },
+    {
+      'Daten': daten([9, 9], 1201),
+      'Gebühr': {'Alt': 0, 'Neu': 0}
+    },
+    {
+      'Daten': daten([9, 9], 1212),
+      'Gebühr': {'Alt': 39, 'Neu': 0}
+    },
+    {
+      'Daten': daten([9, 9], 1239),
+      'Gebühr': {'Alt': 46, 'Neu': 20}
+    }
+  ];
+
+  for (var j = 0; j < arten.length; j++) {
+    for (i = 0, l = Test.length; i < l; i++) {
+      soll = Test[i].Gebühr[arten[j]];
+      ist = Verarbeitung(Test[i].Daten, Parameter[arten[j]]).gebühr;
+      if (soll != ist) {
+        console.log(sprintf(
+          'Test [%d.%s]: Erwartet %d, ist %d!',
+          i + 1, arten[j],
+          soll,
+          ist));
+      }
+    }
+  }
+
+}
+
 function main() {
+  test();
+
   $('form').keyup(handleEnter);
   $('#info').click(showModal);
   $('input[name="inBetreuung"]')
