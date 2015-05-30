@@ -16,6 +16,7 @@ upload: $(HTML) $(SCRIPT) $(STYLE)
 	echo "$^" | sed -r "s/ /\nput /g;s/^/put /;s/put (index)\.min\.html/put \1.min.html \1.html/g" >> ftp.action
 	echo "put favicon.ico" >> ftp.action
 	echo "put humans.txt" >> ftp.action
+	echo "put robots.txt" >> ftp.action
 	ftp ichplatz.de < ftp.action
 	rm ftp.action
 
