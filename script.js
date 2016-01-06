@@ -95,6 +95,7 @@ function berechnen() {
   $('#gebühr').html(GebührText(ErgebnisNeu.gebühr, ErgebnisAlt.gebühr));
   $('.berechnung').show();
   $('.gebuehreninfo').show();
+  weichesScrollen($('#gebühr'));
 }
 
 function Vorbereitung() {
@@ -318,6 +319,12 @@ function LokalSpeichern(Daten) {
     return;
   }
   window.localStorage.setItem('KitaGebRechner', JSON.stringify(Daten));
+}
+
+function weichesScrollen(anker) {
+  $('html,body').animate({
+    scrollTop: anker.offset().top
+  }, 1000);
 }
 
 function LokalLaden() {
