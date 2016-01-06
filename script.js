@@ -19,11 +19,11 @@ kindergeld = function(i) {
   switch (i) {
     case 1:
     case 2:
-      return 184;
-    case 3:
       return 190;
+    case 3:
+      return 196;
     default:
-      return 215;
+      return 221;
   }
 };
 
@@ -413,23 +413,23 @@ function test() {
         'Kinderzahl': null,
         'Einkommen': [{'Art': 'soz', 'Höhe': 1130}]
       },
-      'Gebühr': {'Alt': 24, 'Neu': 24}
+      'Gebühr': {'Alt': 25, 'Neu': 25}
     },
     {
       'Daten': daten([9, 9], 1200),
-      'Gebühr': {'Alt': 0, 'Neu': 0}
-    },
-    {
-      'Daten': daten([9, 9], 1201),
-      'Gebühr': {'Alt': 0, 'Neu': 0}
-    },
-    {
-      'Daten': daten([9, 9], 1212),
       'Gebühr': {'Alt': 39, 'Neu': 0}
     },
     {
+      'Daten': daten([9, 9], 1201),
+      'Gebühr': {'Alt': 39, 'Neu': 0}
+    },
+    {
+      'Daten': daten([9, 9], 1212),
+      'Gebühr': {'Alt': 42, 'Neu': 0}
+    },
+    {
       'Daten': daten([9, 9], 1239),
-      'Gebühr': {'Alt': 46, 'Neu': 20}
+      'Gebühr': {'Alt': 49, 'Neu': 23}
     }
   ];
 
