@@ -17,7 +17,7 @@
     <link rel="stylesheet" href="style.css">
     <script>
 Parameter = {
-  Neu: {
+  V2015: {
     maximalEinkommen: 2861,
     Freibeträge: function(i) {
       if (i == 1) {
@@ -28,18 +28,6 @@ Parameter = {
     Gebührensatz: 13,
     minAnrechenbar: false,
     BetreuungsDifferenzFaktor: 1,
-  },
-  Alt: {
-    maximalEinkommen: 2592,
-    Freibeträge: function(i) {
-      if (i == 1) {
-        return 1130;
-      }
-      return 300;
-    },
-    Gebührensatz: 13,
-    minAnrechenbar: 150,
-    BetreuungsDifferenzFaktor: 0.5
   }
 };
     </script>
@@ -179,12 +167,7 @@ Parameter = {
           <ul class="nav nav-tabs" role="tablist">
             <li role="presentation" class="active">
               <a href="#Geb20150520" aria-controls="Geb20150520" role="tab" data-toggle="tab">
-                Neue Gebühr (vom 20.05.2015)
-              </a>
-            </li>
-            <li role="presentation">
-              <a href="#Geb20100127" aria-controls="Geb20100127" role="tab" data-toggle="tab">
-                Alte Gebühr (vom 27.01.2010)
+                Gebühr (vom 20.05.2015)
               </a>
             </li>
           </ul>
@@ -192,10 +175,7 @@ Parameter = {
           <!-- Tab panes -->
           <div class="tab-content">
             <div role="tabpanel" class="tab-pane active" id="Geb20150520">
-              <pre id="resultNeu"></pre>
-            </div>
-            <div role="tabpanel" class="tab-pane" id="Geb20100127">
-              <pre id="resultAlt"></pre>
+              <pre id="resultV2015"></pre>
             </div>
           </div>
         </div>

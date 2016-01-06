@@ -86,13 +86,12 @@ function berechnen() {
     $('.gebuehreninfo').hide();
     return false;
   }
-  var ErgebnisNeu = Verarbeitung(Daten, Parameter.Neu),
-  ErgebnisAlt = Verarbeitung(Daten, Parameter.Alt);
+
+  var ErgebnisV2015 = Verarbeitung(Daten, Parameter.V2015);
   LokalSpeichern(Daten);
 
-  $('#resultNeu').html(ErgebnisNeu.text);
-  $('#resultAlt').html(ErgebnisAlt.text);
-  $('#gebühr').html(GebührText(ErgebnisNeu.gebühr, ErgebnisAlt.gebühr));
+  $('#resultV2015').html(ErgebnisV2015.text);
+  $('#gebühr').html(GebührText(ErgebnisV2015.gebühr));
   $('.berechnung').show();
   $('.gebuehreninfo').show();
   weichesScrollen($('#gebühr'));
@@ -295,23 +294,10 @@ function Verarbeitung(Daten, Parameter) {
   };
 }
 
-function GebührText(gebührNeu, gebührAlt) {
-  if (gebührNeu == gebührAlt) {
-    return sprintf(
-      'Die berechnete Gebühr bleibt bei <strong>%d<strong> €',
-      gebührNeu);
-  }
+function GebührText(gebührNeu) {
   return sprintf(
-    'Die berechnete Gebühr beträgt <strong>%d</strong> €. ' +
-    '<small>Das ist eine <em>%s</em> um <strong>%d</strong> €' +
-    '%s gegenüber der alten Gebühr von %d €</small>.',
-    gebührNeu,
-    gebührNeu > gebührAlt ? 'Erhöhung' : 'Verringerung',
-    Math.abs(gebührNeu - gebührAlt),
-    gebührAlt === 0 ? '' : sprintf(
-        ' (%s %%)',
-        Math.round(Math.abs(gebührNeu - gebührAlt) / gebührAlt * 100)),
-    gebührAlt);
+    'Die berechnete Gebühr beträgt <strong>%d</strong> €.',
+    gebührNeu);
 }
 
 function LokalSpeichern(Daten) {
@@ -396,23 +382,23 @@ function test() {
       'Kinderzahl': zeiten.length,
       'Einkommen': [{'Art': art || 'unth', 'Höhe': höhe || 99999}]
     };
-  }, soll, ist, arten = ['Alt', 'Neu'],
+  }, soll, ist, arten = ['V2015'],
   Test = [
     {
       'Daten': daten([9]),
-      'Gebühr': {'Alt': 1 * 190, 'Neu': 1 * 225}
+      'Gebühr': {'V2015': 1 * 225}
     },
     {
       'Daten': daten([9, 9]),
-      'Gebühr': {'Alt': 2 * 151, 'Neu': 2 * 173}
+      'Gebühr': {'V2015': 2 * 173}
     },
     {
       'Daten': daten([9, 9, 9]),
-      'Gebühr': {'Alt': 3 * 112, 'Neu': 3 * 121}
+      'Gebühr': {'V2015': 3 * 121}
     },
     {
       'Daten': daten([9, 8], 5100, 'ssp'),
-      'Gebühr': {'Alt': 294, 'Neu': 327}
+      'Gebühr': {'V2015': 327}
     },
     {
       'Daten': {
@@ -420,23 +406,15 @@ function test() {
         'Kinderzahl': null,
         'Einkommen': [{'Art': 'soz', 'Höhe': 1130}]
       },
-      'Gebühr': {'Alt': 25, 'Neu': 25}
+      'Gebühr': {'V2015': 25}
     },
     {
-      'Daten': daten([9, 9], 1200),
-      'Gebühr': {'Alt': 39, 'Neu': 0}
+      'Daten': daten([9, 9], 1226),
+      'Gebühr': {'V2015': 0}
     },
     {
-      'Daten': daten([9, 9], 1201),
-      'Gebühr': {'Alt': 39, 'Neu': 0}
-    },
-    {
-      'Daten': daten([9, 9], 1212),
-      'Gebühr': {'Alt': 42, 'Neu': 0}
-    },
-    {
-      'Daten': daten([9, 9], 1239),
-      'Gebühr': {'Alt': 49, 'Neu': 23}
+      'Daten': daten([9, 9], 1227),
+      'Gebühr': {'V2015': 20}
     }
   ];
 
