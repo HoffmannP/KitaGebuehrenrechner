@@ -12,7 +12,7 @@ all: $(HTML)
 
 upload: $(HTML) $(SCRIPT) $(STYLE)
 	# Remember to set auth details in ~/.netrc
-	echo "cd ichplatz" > ftp.action
+	echo "cd ichplatz/kitagebuehr" > ftp.action
 	echo "$^" | sed -r "s/ /\nput /g;s/^/put /;s/put (index)\.min\.html/put \1.min.html \1.html/g" >> ftp.action
 	echo "put favicon.ico" >> ftp.action
 	echo "put humans.txt" >> ftp.action
